@@ -84,7 +84,7 @@ document.getElementById("addLocation").onclick = function(){
 
 // get locations addresses
 async function reverseGeocode(coords, placeId) {
-    await fetch('http://nominatim.openstreetmap.org/reverse?format=json&lon=' + coords[0] + '&lat=' + coords[1])
+    await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + coords[0] + '&lat=' + coords[1])
         .then(response => {
         if (!response.ok){
             throw new Error("HTTP error " + response.status);
