@@ -20,28 +20,110 @@ div{
     border: 0;
 }
 
+
 #heading{
-    height: 10%;
-    background-color: rgb(245,245,245);
-    position: relative;
+    height: 80px;
     z-index: 2;
 }
 
+
 #panel{
     float: left;
-    width: 20%;
-    height: 90%;
+    width: 350px;
+    height: calc(100% - 80px);
     background-color: rgb(255,255,255);
-    box-shadow: 0 0 20px 0 rgba(0 0 0 / 30%);
+    box-shadow: 0 0 20px rgba(0 0 0 / 30%);
     position: relative;
     z-index: 1;
+    overflow-y: auto;
+    padding-top: 20px;
+    
 }
 
-.map {
-        float: left;
-        height: 90%;
-        width: 80%;
-        margin: 0;
+#mapContainer {
+        
+        height: calc(100% - 80px);
         padding: 0;
-        border: 0;
+        
+}
+
+.row{
+    height: 100%;
+    margin: 0;
+    position:relative;
+}
+
+.map{
+    width: 100%;
+    padding: 0;
+}
+
+.myRadios{
+    padding: 10px 15px 10px 30px;
+}
+
+#addLocation{
+    background-color: #b8d26c;
+    color: white;
+    float: right;
+}
+
+#locationsContainer{
+    border: 1px solid #ced4da;
+    margin: 5px 12px;
+    border-radius: .25rem;
+    padding: 17px 0px;
+}
+
+#loactionsList{
+    
+    padding: 5px 15px;
+}
+
+#submit{
+    align: center;
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #bebec4;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888; 
+}
+
+
+
+li:hover {
+  background-color: #eff1f2;
+  border-radius: .25rem;
+  cursor: pointer;
+}
+
+.selected{
+    background-color: #8c8f91;
+    border-radius: .25rem;
+}
+
+.selected:hover{
+    background-color: #8c8f91;
+    border-radius: .25rem;
+}
+
+
+.bold{
+    font-weight: bold;
 }
