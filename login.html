@@ -3,117 +3,150 @@
     <head>
         <title>osm-auth</title>
         <link rel='stylesheet' type='text/css' href='' />
-        <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
         <style>
-        body {
-            width: 300px;
-            margin: 40px auto;
-            font:normal 12px/20px 'Helvetica Neue', sans-serif;
-        }
-        button {
-            border-radius:5px;
-            background:#54af29;
-            border-color:#2C7505;
-            color:#fff;
-            width:145px;
-            font-size:25px;
-            text-shadow:1px 1px -1px #2C7505;
-            padding:10px;
-        }
-        button.done {
-            background:#2C7505;
-        }
-        button:hover {
-            background: #2C7505;
-        }
-        #user {
-            display:none;
-            font:normal 15px/20px 'Helvetica Neue', sans-serif;
-            text-align:center;
-        }
-        h1, h2 {
-            margin: 10px 0;
-        }
-        p {
-            text-align:center;
-            color:#666;
-        }
+            html {
+                height: 100%;
+                width: 100%;
+            }
+            
+            body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                font:normal 12px/20px 'Helvetica Neue', sans-serif;
+                border: 0;
+            }
+            
+            
+            
+            h1, h2 {
+                margin: 10px 0;
+            }
+            
+            p {
+                text-align:center;
+                color:#666;
+            }
+
+            #bg{
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+                background-image: url('./images/loginBG.jpg');
+                height: 100%;
+                width: 100%;
+                opacity: 0.3;
+                position: absolute;
+                top: 0px;
+                left: 0px;
+            }
+            
+            
+
+            
         </style>
-        <script src='./javascript/osmauth.js'></script>
     </head>
     <body>
-        <button id='authenticate'>login</button>
-        <button id='logout'>logout</button>
-        <div id='user'>
-            <h1 id='display_name'></h1>
-            <h2 id='id'></h2>
-            Changesets: <span id='count'></span>
+        <div id="bg"></div>
+        
+        <div class="container" style="height: 100%;">
+
+            <div class="row align-items-center justify-content-center" style="height: 100%;">
+
+                <!--<div id="loginPanel" class="col-3 d-flex justify-content-center">
+                    <p>ADASDAS</p>
+                    <button id='authenticate' class="btn btn-success">login</button>
+                    
+                </div>-->
+                <div class="card text-center" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Card title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <button id="authenticate" class="btn btn-success">login</button>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
+        <form id="userInfo" method="POST" action="index.php">
+            <input type="hidden" id="username" name="username" value="">
+            <input type="hidden" id="userId" name="userId" value="">
+            <input type="hidden" id="count" name="count" value="">
+        </form>
+        <!--
+        <form id="userInfo" method="POST" action="index.php">
+            <input type="hidden" id="username" name="username" value="">
+            <input type="hidden" id="userId" name="userId" value="">
+            <input type="hidden" id="count" name="count" value="">
+        </form>
         <p><a href='https://github.com/osmlab/osm-auth'>osm-auth</a> is a minimal
         example of authenticating and interacting with the
         <a href='http://www.openstreetmap.org/'>openstreetmap</a>
-        API.</p>
+        API.</p>-->
+        
+        
+            
+        
+        <script src='./javascript/osmauth.js'></script>
         <script>
-        var auth = osmAuth({
-            oauth_secret: '2Y0dxGIAXZCr6Fc7ipzzw3i1U2Hqoxmv7mnB7xtj',
-            oauth_consumer_key: '8fgyZBpl7y2UFcdaZAPl1oYGe1vewyB24sOxfMZG'
-        });
-        function done(err, res) {
-            if (err) {
-                document.getElementById('user').innerHTML = 'error! try clearing your browser cache';
-                document.getElementById('user').style.display = 'block';
-                return;
+            var auth = osmAuth({
+                oauth_secret: '2Y0dxGIAXZCr6Fc7ipzzw3i1U2Hqoxmv7mnB7xtj',
+                oauth_consumer_key: '8fgyZBpl7y2UFcdaZAPl1oYGe1vewyB24sOxfMZG',
+                //auto: true,            
+            });
+
+            function done(err, res){ 
+                if (err) {
+                    document.getElementById('user').innerHTML = 'error! try clearing your browser cache';
+
+                    return;
+                }
+                var u = res.getElementsByTagName('user')[0];
+                var changesets = res.getElementsByTagName('changesets')[0];
+                var o = {
+                    display_name: u.getAttribute('display_name'),
+                    id: u.getAttribute('id'),
+                    count: changesets.getAttribute('count')
+                };
+                document.getElementById("username").value = o.display_name;
+                document.getElementById("userId").value = o.id;
+                document.getElementById("count").value = o.count;
+                document.getElementById("userInfo").submit();
             }
-            var u = res.getElementsByTagName('user')[0];
-            var changesets = res.getElementsByTagName('changesets')[0];
-            var o = {
-                display_name: u.getAttribute('display_name'),
-                id: u.getAttribute('id'),
-                count: changesets.getAttribute('count')
+
+            document.getElementById('authenticate').onclick = function() {
+                if (!auth.bringPopupWindowToFront()) {
+                    auth.authenticate(function() {
+                        update();
+                    });
+                }
             };
-            for (var k in o) {
-                document.getElementById(k).innerHTML = o[k];
+
+            function showDetails() {
+                auth.xhr({
+                    method: 'GET',
+                    path: '/api/0.6/user/details'
+                },done);
             }
-            document.getElementById('user').style.display = 'block';
-        }
 
-        document.getElementById('authenticate').onclick = function() {
-            if (!auth.bringPopupWindowToFront()) {
-                auth.authenticate(function() {
-                    update();
-                });
+            function update() {
+                if (auth.authenticated()) {
+                    document.getElementById('authenticate').className = 'done';
+                    showDetails();
+                }
             }
-        };
 
-        function showDetails() {
-            auth.xhr({
-                method: 'GET',
-                path: '/api/0.6/user/details'
-            }, done);
-        }
-
-        function hideDetails() {
-            document.getElementById('user').style.display = 'none';
-        }
-
-        document.getElementById('logout').onclick = function() {
-            auth.logout();
-            update();
-        };
-
-        function update() {
-            if (auth.authenticated()) {
-                document.getElementById('authenticate').className = 'done';
-                document.getElementById('logout').className = '';
-                showDetails();
-            } else {
-                document.getElementById('authenticate').className = '';
-                document.getElementById('logout').className = 'done';
-                hideDetails();
+            window.onload = function(){
+                if (auth.authenticated()) {
+                    auth.logout();
+                }
             }
-        }
-
-        update();
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     </body>
 </html>
