@@ -9,7 +9,8 @@ body{
     margin: 0;
     padding: 0;
     border: 0;
-    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-family: Arial, Verdana, Helvetica, sans-serif;
+    /*font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;*/
     font-size: 13px; 
     line-height: 15px;
 }
@@ -24,6 +25,7 @@ div{
 #heading{
     height: 80px;
     z-index: 2;
+    background-color: #e3f2fd;
 }
 
 
@@ -38,6 +40,20 @@ div{
     overflow-y: auto;
     padding-top: 20px;
     
+}
+
+#greeting{
+    margin: 0;
+    margin-bottom: 70px;
+    text-align: justify;
+    text-justify: inter-word;
+    padding: 0 12px;
+}
+
+p{
+    margin: 0;
+    padding: 0;
+    line-height: 150%;
 }
 
 #mapContainer {
@@ -145,4 +161,15 @@ li:hover {
     width: 20px;
     height: 20px;
     font-weight: bold;
+}
+
+#more{
+    display: none;
+}
+
+
+#moreLess{
+    float: right;
+    margin-top: 15px;
+    font-size: 10px;
 }
