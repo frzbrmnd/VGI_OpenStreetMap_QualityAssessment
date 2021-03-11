@@ -200,3 +200,25 @@ function deleteLocation(){
         }
     }
 }
+
+
+document.getElementById("moreLess").onclick = function(){            //read more, read less
+    var dots = document.getElementById("dots");
+    var moreText = document.getElementById("more");
+    var btnText = document.getElementById("moreLess");
+
+    if (dots.style.display === "none") {
+      dots.style.display = "inline";
+      btnText.innerHTML = "Read more"; 
+      moreText.style.display = "none";
+    } else {
+      dots.style.display = "none";
+      btnText.innerHTML = "Read less"; 
+      moreText.style.display = "inline";
+    }
+};
+
+
+document.getElementById("logout").onclick = function(){
+    location.replace("http://localhost:8080/VGI_OpenStreetMap_QualityAssessment/login.html");
+}
