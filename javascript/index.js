@@ -1,6 +1,6 @@
 var maxRadius = 500;            // maximum acceptable radius
 var location_id = 0;            // first id
-
+var userInfo;
 
 var raster = new ol.layer.Tile({            // main layer: OSM
   source: new ol.source.OSM(),
@@ -219,6 +219,65 @@ document.getElementById("moreLess").onclick = function(){            //read more
 };
 
 
+
+
+var auth = osmAuth({                //authentications using OAuth on openstreetmap
+    oauth_secret: '2Y0dxGIAXZCr6Fc7ipzzw3i1U2Hqoxmv7mnB7xtj',
+    oauth_consumer_key: '8fgyZBpl7y2UFcdaZAPl1oYGe1vewyB24sOxfMZG',           
+});
+
+function done(err, res){ 
+    if (err) {
+        alert('error! try clearing your browser cache');
+        return;
+    }
+    var u = res.getElementsByTagName('user')[0];
+    var changesets = res.getElementsByTagName('changesets')[0];
+    userInfo = {
+        display_name: u.getAttribute('display_name'),
+        id: u.getAttribute('id'),
+        count: changesets.getAttribute('count')
+    };
+    document.getElementById("helloUser").innerHTML = "Hi " + userInfo.display_name + "!";
+    document.getElementById("helloUser").style.display = 'block';
+}
+
+document.getElementById('login').onclick = function() {
+    if(!auth.authenticated()){
+        if (!auth.bringPopupWindowToFront()) {
+            auth.authenticate(function() {
+                update();
+            });
+        }
+    }else{
+        alert("you are logged in as " + userInfo.display_name);
+    }
+};
+
 document.getElementById("logout").onclick = function(){
-    location.replace("http://localhost:8080/VGI_OpenStreetMap_QualityAssessment/login.html");
+    if(auth.authenticated()){
+        auth.logout();
+    }
+    alert("logged out");
+    document.getElementById("helloUser").style.display = 'none';
+}
+
+function showDetails() {
+    auth.xhr({
+        method: 'GET',
+        path: '/api/0.6/user/details'
+    },done);
+}
+
+function update() {
+    if (auth.authenticated()) {
+        showDetails();
+    }
+}
+
+
+window.onload = function(){
+    if (auth.authenticated()) {
+        auth.logout();
+    }
 }
