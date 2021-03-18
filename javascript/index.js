@@ -193,10 +193,7 @@ function deleteLocation(){
     for (var i = 0; i < allFeatures.length; i++){
         if (allFeatures[i].getId() === id){         //element.classList.remove("newStyle");
             source.removeFeature(allFeatures[i]);
-
             document.getElementById(id).remove();
-            
-            
         }
     }
 }
@@ -236,10 +233,14 @@ function done(err, res){
     userInfo = {
         display_name: u.getAttribute('display_name'),
         id: u.getAttribute('id'),
-        count: changesets.getAttribute('count')
+        changesetsCount: changesets.getAttribute('count')
     };
     document.getElementById("helloUser").innerHTML = "Hi " + userInfo.display_name + "!";
     document.getElementById("helloUser").style.display = 'block';
+    
+    document.getElementById("username").value = userInfo.display_name;
+    document.getElementById("osmId").value = userInfo.id;
+    document.getElementById("changesetsCount").value = userInfo.changesetsCount;
 }
 
 document.getElementById('login').onclick = function() {
@@ -279,5 +280,56 @@ function update() {
 window.onload = function(){
     if (auth.authenticated()) {
         auth.logout();
+    }
+}
+
+
+function validateForm() {
+    
+    var formIsValide = true;
+    var errorMessage = ""; 
+    
+    //check if the user have logged in
+    if(!auth.authenticated()){
+        errorMessage += "You are not logged in. \n";
+        formIsValide = false;
+    }
+    
+    //check if the user have added any location
+    var locations = source.getFeatures();
+    if(locations.length == 0){
+        errorMessage += "List of locations is empty. Please add some locations.";
+        formIsValide = false;
+    }
+    
+    //create hidden inputs for locations
+    var form = document.getElementById("myForm");
+    document.getElementById("length").value = locations.length;
+    for (var i = 0; i < locations.length; i++){
+        var radius = document.createElement("INPUT");
+        radius.setAttribute("type", "hidden");
+        radius.setAttribute("name", "location_" + i + "_radius");
+        radius.value = locations[i].getGeometry().getRadius();
+        form.appendChild(radius);
+        
+        var center = ol.proj.transform(locations[i].getGeometry().getCenter(), "EPSG:3857", "EPSG:4326");
+        
+        var lat = document.createElement("INPUT");
+        lat.setAttribute("type", "hidden");
+        lat.setAttribute("name", "location_" + i + "_lat");
+        lat.value = center[1];
+        form.appendChild(lat);
+        
+        var lon = document.createElement("INPUT");
+        lon.setAttribute("type", "hidden");
+        lon.setAttribute("name", "location_" + i + "_lon");
+        lon.value = center[0];
+        form.appendChild(lon);
+    }
+    
+    if(formIsValide){
+        form.submit();
+    }else {
+        alert(errorMessage);
     }
 }

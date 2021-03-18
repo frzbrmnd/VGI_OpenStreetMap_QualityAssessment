@@ -32,12 +32,12 @@
                 <button id="moreLess" class="btn btn-secondary">Read more</button>
                 
             </div>
-            <form><!-- to do -->
+            <form id="myForm" action="saveData.php" method="post">
                  
                 <div class="mb-3 row">
                     <label for="age" class="col-sm-2 col-form-label bold">Age:</label>
                     <div class="col-sm-10">
-                        <input type="text" id="age" class="form-control" name="age">
+                        <input type="number" id="age" class="form-control" name="age" value="0" oninput="javascript: if (this.value.length > 2) this.value = this.value.slice(0, 2);" min="0" max="99">
                     </div>
                 </div>
                 
@@ -64,11 +64,12 @@
                     <label for="education" class="col-sm-3 col-form-label bold">Education:</label>
                     <div class="col-sm-9">
                         <select id="education" class="form-select form-select-sm" name="education"><!-- to do -->
-                            <option value="test0">test0</option>
-                            <option value="test1">test1</option>
-                            <option value="test2">test2</option>
-                            <option value="test3">test3</option>
-                            <option value="test4">test4</option>
+                            <option></option>illiterate
+                            <option value="illiterate">illiterate</option>
+                            <option value="High school">High school diploma or lower</option>
+                            <option value="Bachelor degree">Bachelor degree</option>
+                            <option value="Master degree">Master degree</option>
+                            <option value="PhD">PhD</option>
                         </select><br>
                     </div>
                 </div>
@@ -95,9 +96,12 @@
                     </div>
                 
                 <div class="mb-3 row justify-content-center">
-                    <button type="submit" value="Submit" id="submit" class="btn btn-primary col-sm-3">Submit</button>
+                    <button type="button" name="btnSubmit" id="btnSubmit" class="btn btn-primary col-sm-3" onclick="event.preventDefault(); validateForm()">Save</button>
                 </div>
-
+                <input id="username" type="hidden" name="username">
+                <input id="osmId" type="hidden" name="osmId">
+                <input id="changesetsCount" type="hidden" name="changesetsCount">
+                <input id="length" type="hidden" name="length">
             </form>
         </div>
         <div id="mapContainer" class="container-fluid">
