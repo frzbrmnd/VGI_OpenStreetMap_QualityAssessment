@@ -1,25 +1,54 @@
-<?php
-    
-    if(isset($_POST['username']) && $_POST['userId']){
-        $username = $_POST['username'];
-        $userId = $_POST['userId'];
-        $count = $_POST['count'];
+<?php require_once("functions.php"); ?>  
+<?php   
+    if (!empty($_POST)){
+        $errorMessage = "";
+        $length = $_POST["length"];
+        if (empty($_POST['osmId'])){            //check if the user have logged in
+            $errorMessage .= "You are not logged in. <br/>";
+        }
+        if (empty($length)){                    //check if the user have added any location
+            $errorMessage .= "List of locations is empty. Please add some locations.";
+        }
         
-    } else {
-        header("Location: login.html");
-        exit;
+        if (!empty($errorMessage)){
+            ?>
+            <style type="text/css">
+                #errorMessageContainer {
+                    display: block;
+                }
+            </style>
+            <script>
+                document.getElementById("errorMessage").innerHTML = '<?php echo $errorMessage; ?>';
+            </script>
+            <?php
+        } else {
+            $query = "";
+            if ($_POST['newUser'] == "existing"){
+                $query .= "UPDATE users ";
+                $query .= " SET changesetscount={$_POST['changesetsCount']}, age={$_POST['age']}, gender='{$_POST['gender']}', education='{$_POST['education']}' ";
+                $query .= " WHERE osmid={$_POST['osmId']};";
+            }else {
+                $query .= "INSERT INTO ";
+                $query .= "users ";
+                $query .= "(username, osmid, changesetscount, age, gender, education) ";
+                $query .= "VALUES ('{$_POST['username']}', {$_POST['osmId']}, {$_POST['changesetsCount']}, {$_POST['age']}, '{$_POST['gender']}', '{$_POST['education']}'); ";
+            }
+            
+            $query .= " DELETE FROM locations WHERE osmid={$_POST['osmId']};";
+            for ($i = 0; $i < $length; $i++) {
+                $query .= createInsertQueryForLocations($_POST['osmId'], $_POST["location_" . $i . "_lat"], $_POST["location_" . $i . "_lon"], $_POST["location_" . $i . "_radius"]);
+            }
+            performQuery($query);
+        }
     }
-
-
-    
-    
 ?>
-
+        
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
         <link rel="stylesheet" href="./style/ol.css" type="text/css">
         <link rel="stylesheet" href="./style/styleSheet.css">
@@ -34,23 +63,37 @@
                     <h2>OSM Quality Assessment</h2>
                 </div>
                 <div class="col-auto">
-                    <button id="logout" type="button" class="btn btn-outline-success">Log out</button>
+                    <button id="login" type="button" class="btn btn-outline-success">Login</button>
+                </div>  
+                <div class="col-auto">
+                    <button id="logout" type="button" class="btn btn-outline-success">Logout</button>
                 </div>  
             </div>
         </nav>
+        
+        <div id="errorMessageContainer" class="alert alert-danger">
+            <h4>Error occurred</h4>
+            
+            <p id="errorMessage"></p>
+            
+            <button id="closeMessage" class="btn" onclick="myFunction()">
+                <span>&times;</span>
+            </button>
+        </div>
+        
         <div id="panel">
             <div id="greeting">
-                <h2>Hi <?php echo $username?>!</h2>
-                <p>We want you to fill the form below and mark your favorite locations on the map. These <span id="dots">...</span><span id="more">locations may include where you live or work, and are not necessarily related to your OSM participation. You can add your locations by clicking on "Add new location" button and then mark it on the map. Since privacy is our priority, you can define your locations with a circle with a maximum radius of 500 meters.<br>For more information about this project <a href="#">click here.</a></span></p>
+                <h2 id="helloUser">asd</h2>
+                <p>We want you to fill the form below and mark your favorite locations on the map. These <span id="dots">...</span><span id="more">locations may include where you live or work, and are not necessarily related to your OSM participation. You can add your locations by clicking on "Add new location" button and then mark it on the map. Since privacy is our priority, you can define your locations with a circle with a maximum radius of 500 meters.<br>For more information about this project <a href="https://github.com/frzbrmnd/VGI_OpenStreetMap_QualityAssessment">click here.</a></span></p>
                 <button id="moreLess" class="btn btn-secondary">Read more</button>
                 
             </div>
-            <form><!-- to do -->
+            <form id="myForm" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
                  
                 <div class="mb-3 row">
                     <label for="age" class="col-sm-2 col-form-label bold">Age:</label>
                     <div class="col-sm-10">
-                        <input type="text" id="age" class="form-control" name="age">
+                        <input type="number" id="age" class="form-control" name="age" value="0" oninput="javascript: if (this.value.length > 2) this.value = this.value.slice(0, 2);" min="0" max="99">
                     </div>
                 </div>
                 
@@ -77,11 +120,12 @@
                     <label for="education" class="col-sm-3 col-form-label bold">Education:</label>
                     <div class="col-sm-9">
                         <select id="education" class="form-select form-select-sm" name="education"><!-- to do -->
-                            <option value="test0">test0</option>
-                            <option value="test1">test1</option>
-                            <option value="test2">test2</option>
-                            <option value="test3">test3</option>
-                            <option value="test4">test4</option>
+                            <option id="none"></option>
+                            <option id="Illiterate" value="Illiterate">illiterate</option>
+                            <option id="HighSchool" value="HighSchool">High school diploma or lower</option>
+                            <option id="BachelorDegree" value="BachelorDegree">Bachelor degree</option>
+                            <option id="MasterDegree" value="MasterDegree">Master degree</option>
+                            <option id="Phd" value="Phd">PhD</option>
                         </select><br>
                     </div>
                 </div>
@@ -108,9 +152,13 @@
                     </div>
                 
                 <div class="mb-3 row justify-content-center">
-                    <button type="submit" value="Submit" id="submit" class="btn btn-primary col-sm-3">Submit</button>
+                    <button type="button" name="btnSubmit" id="btnSubmit" class="btn btn-primary col-sm-3" onclick="event.preventDefault(); validateForm()">Save</button>
                 </div>
-
+                <input id="username" type="hidden" name="username">
+                <input id="osmId" type="hidden" name="osmId">
+                <input id="changesetsCount" type="hidden" name="changesetsCount">
+                <input id="length" type="hidden" name="length">
+                <input id="newUser" type="hidden" name="newUser">
             </form>
         </div>
         <div id="mapContainer" class="container-fluid">
@@ -118,8 +166,17 @@
                 <div id="map" class="map"></div>
             </div>
         </div>
-       
+        <div id="asd"> </div>
+        <script src='./javascript/osmauth.js'></script>
         <script src="./javascript/index.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     </body>
 </html>
+
+
+
+
+        
+
+
+       

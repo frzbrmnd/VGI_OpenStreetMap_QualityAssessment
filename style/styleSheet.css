@@ -178,3 +178,26 @@ li:hover {
 #helloUser{
     display: none;
 }
+
+#errorMessageContainer{
+    margin: 0;
+    display: none;
+}
+
+#closeMessage{
+    background: none;
+    color: #842029;
+    font-size: 25px;
+    padding: 0px 3px;
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+#closeMessage:hover{
+    color: #3b0107;
+    font-weight: bold;
+    
+}

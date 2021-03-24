@@ -171,8 +171,8 @@ function checkRadius(featureRadius, maxRadius){             //return true if rad
     }
 }
 
-function createMaxRadiusCircle(centroid, maxRadius){            //used for creating a new location with maximum radius if primitive radius is bigger than maximum radius
-    var newCircle = new ol.geom.Circle(centroid, maxRadius);
+function createMaxRadiusCircle(centroid, radius){            //used for creating a new location 
+    var newCircle = new ol.geom.Circle(centroid, radius);
     var newFeature = new ol.Feature({
                 name: 'new Circle',
                 geometry: newCircle
@@ -235,6 +235,8 @@ function done(err, res){
         id: u.getAttribute('id'),
         changesetsCount: changesets.getAttribute('count')
     };
+    
+    loadDoc(userInfo);
     document.getElementById("helloUser").innerHTML = "Hi " + userInfo.display_name + "!";
     document.getElementById("helloUser").style.display = 'block';
     
@@ -259,9 +261,26 @@ document.getElementById("logout").onclick = function(){
     if(auth.authenticated()){
         auth.logout();
     }
-    alert("logged out");
+    source.clear();
+    document.getElementById("age").value = 0;
+    //document.getElementById("gender").value = 0;
+    document.getElementById('male').checked = false;
+    document.getElementById('female').checked = false;
+    document.getElementById('other').checked = false;
+    document.getElementById('education').checked = false;
+    document.getElementById("none").selected = true;
+    //alert("logged out");
     document.getElementById("helloUser").style.display = 'none';
+    
+    var theList = document.getElementById("loactionsList");
+    var theListItems = theList.getElementsByTagName("li");
+    for (var i = 0; i < theListItems.length; i++){
+        theList.removeChild(theListItems[i]);
+    }
 }
+
+
+
 
 function showDetails() {
     auth.xhr({
@@ -288,7 +307,8 @@ function validateForm() {
     
     var formIsValide = true;
     var errorMessage = ""; 
-    
+    var form = document.getElementById("myForm");
+   
     //check if the user have logged in
     if(!auth.authenticated()){
         errorMessage += "You are not logged in. \n";
@@ -303,7 +323,6 @@ function validateForm() {
     }
     
     //create hidden inputs for locations
-    var form = document.getElementById("myForm");
     document.getElementById("length").value = locations.length;
     for (var i = 0; i < locations.length; i++){
         var radius = document.createElement("INPUT");
@@ -311,9 +330,7 @@ function validateForm() {
         radius.setAttribute("name", "location_" + i + "_radius");
         radius.value = locations[i].getGeometry().getRadius();
         form.appendChild(radius);
-        
-        var center = ol.proj.transform(locations[i].getGeometry().getCenter(), "EPSG:3857", "EPSG:4326");
-        
+        var center = ol.proj.transform(locations[i].getGeometry().getCenter(), "EPSG:3857", "EPSG:4326");  
         var lat = document.createElement("INPUT");
         lat.setAttribute("type", "hidden");
         lat.setAttribute("name", "location_" + i + "_lat");
@@ -331,5 +348,46 @@ function validateForm() {
         form.submit();
     }else {
         alert(errorMessage);
+    }
+}
+
+
+function myFunction(){
+    document.getElementById('errorMessageContainer').style.display = 'none';
+};
+        
+        
+function loadDoc(userInfo) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var data = JSON.parse(this.responseText);
+            var locationsArray = data[0];
+            var userInfo = data[1];
+            if (locationsArray.length == 0){
+                document.getElementById('newUser').value = "new";
+            }else {
+                document.getElementById('newUser').value = "existing";
+                addExistingLocationsToSource(locationsArray);
+                document.getElementById('age').value = parseInt(userInfo.age);
+                if(userInfo.gender !== "") document.getElementById(userInfo.gender).checked = true;
+                if(userInfo.education !== "") document.getElementById(userInfo.education).selected = true;
+            }
+        }
+    };
+    xhttp.open("POST", "loadDoc.php", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send("username=" + userInfo.display_name + "&osmId=" + userInfo.id);
+}
+
+
+function addExistingLocationsToSource(locationsArray){
+    for (var i = 0; i < locationsArray.length; i++){
+        var centerStr = locationsArray[i].center; 
+        var centerSplited = centerStr.substring(1, centerStr.length-1).split(",");
+        var centerFloat = [parseFloat(centerSplited[0]), parseFloat(centerSplited[1])];        
+        var centroid = ol.proj.transform(centerFloat, "EPSG:4326", "EPSG:3857");
+        var newFeature = createMaxRadiusCircle(centroid, parseFloat(locationsArray[i].radius));
+        source.addFeature(newFeature);
     }
 }
