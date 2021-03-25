@@ -119,7 +119,6 @@ window.onclick = e => {             //select a location by clicking on its addre
     };  
 }
 
-// get locations addresses
 async function AddLocationAddress(coords, location_id) {            //function used for getting a locations address and adding it to the list of locations
     var new_location = document.createElement('li');
     new_location.setAttribute("id", location_id);
@@ -263,16 +262,14 @@ document.getElementById("logout").onclick = function(){
     }
     source.clear();
     document.getElementById("age").value = 0;
-    //document.getElementById("gender").value = 0;
     document.getElementById('male').checked = false;
     document.getElementById('female').checked = false;
     document.getElementById('other').checked = false;
     document.getElementById('education').checked = false;
     document.getElementById("none").selected = true;
-    //alert("logged out");
     document.getElementById("helloUser").style.display = 'none';
     
-    var theList = document.getElementById("loactionsList");
+    var theList = document.getElementById("loactionsList");             //bug: doesnt delete the last location address
     var theListItems = theList.getElementsByTagName("li");
     for (var i = 0; i < theListItems.length; i++){
         theList.removeChild(theListItems[i]);
@@ -298,7 +295,7 @@ function update() {
 
 window.onload = function(){
     if (auth.authenticated()) {
-        auth.logout();
+        update();
     }
 }
 

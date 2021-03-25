@@ -2,13 +2,27 @@
 <?php   
     if (!empty($_POST)){
         $errorMessage = "";
-        $length = $_POST["length"];
+        $length = (int) $_POST["length"];
+        $username = pg_escape_string($_POST['username']);
+        $osmId = (int) $_POST['osmId'];
+        $changeSetsCount = (int) $_POST['changesetsCount'];
+        $age = (int) $_POST['age'];
+        $gender = $_POST['gender'];
+        $education = $_POST['education'];
+        
         if (empty($_POST['osmId'])){            //check if the user have logged in
             $errorMessage .= "You are not logged in. <br/>";
         }
         if (empty($length)){                    //check if the user have added any location
-            $errorMessage .= "List of locations is empty. Please add some locations.";
+            $errorMessage .= "List of locations is empty. Please add some locations.<br/>";
         }
+        if (!($gender === "" || $gender === "male" || $gender === "female" || $gender === "other")){                    //check if gender is valid
+            $errorMessage .= "$gender is not valid. <br/>";
+        }
+        if (!($education === "" || $education === "illiterate" || $education === "HighSchool" || $education === "BachelorDegree" || $education === "MasterDegree" || $education === "Phd")){                    //check if education is valid
+            $errorMessage .= "$education is not valid.";
+        }
+        
         
         if (!empty($errorMessage)){
             ?>
@@ -23,20 +37,23 @@
             <?php
         } else {
             $query = "";
-            if ($_POST['newUser'] == "existing"){
+            if ($_POST['newUser'] === "existing"){
                 $query .= "UPDATE users ";
-                $query .= " SET changesetscount={$_POST['changesetsCount']}, age={$_POST['age']}, gender='{$_POST['gender']}', education='{$_POST['education']}' ";
-                $query .= " WHERE osmid={$_POST['osmId']};";
-            }else {
+                $query .= " SET changesetscount={$changeSetsCount}, age={$age}, gender='{$gender}', education='{$education}' ";
+                $query .= " WHERE osmid=$osmId;";
+            }else if ($_POST['newUser'] === "new") {
                 $query .= "INSERT INTO ";
                 $query .= "users ";
                 $query .= "(username, osmid, changesetscount, age, gender, education) ";
-                $query .= "VALUES ('{$_POST['username']}', {$_POST['osmId']}, {$_POST['changesetsCount']}, {$_POST['age']}, '{$_POST['gender']}', '{$_POST['education']}'); ";
+                $query .= "VALUES ('{$username}', {$osmId}, {$changeSetsCount}, {$age}, '{$gender}', '{$education}'); ";
             }
             
-            $query .= " DELETE FROM locations WHERE osmid={$_POST['osmId']};";
+            $query .= " DELETE FROM locations WHERE osmid={$osmId};";
             for ($i = 0; $i < $length; $i++) {
-                $query .= createInsertQueryForLocations($_POST['osmId'], $_POST["location_" . $i . "_lat"], $_POST["location_" . $i . "_lon"], $_POST["location_" . $i . "_radius"]);
+                $latitude = (float) $_POST["location_" . $i . "_lat"];
+                $longitude = (float) $_POST["location_" . $i . "_lon"];
+                $radius = (float) $_POST["location_" . $i . "_radius"];
+                $query .= createInsertQueryForLocations($osmId, $latitude, $longitude, $radius);
             }
             performQuery($query);
         }
